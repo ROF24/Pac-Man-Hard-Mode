@@ -1,0 +1,47 @@
+body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: black;
+      }
+button{
+  outline: none;
+  border: 2px solid black; /* white border, change color as needed */
+  background: black;       /* dark background for contrast */
+  color: black;
+  border-radius: 8px;     /* optional: rounded corners */}
+
+canvas {
+  display: block;
+}
+
+@media (max-width: 480px) {
+  body {
+    background: #000;
+  }
+
+}
+@media (max-width: 480px) {
+  .button-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+  }
+  
+  .phone-buttonA, .phone-buttonB, .phone-buttonC {
+    width: 50px;
+    height: 50px;
+    font-size: 14px; /* Adjust size for smaller screens */
+  }
+}
+@media (min-width: 1030px) {
+  .button-container {
+    display: none; /* Hide buttons on larger screens */
+  }
+}
