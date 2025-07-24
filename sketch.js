@@ -99,9 +99,6 @@ function setup() {
     }
   }
   arrowsShooterImage = loadImage("Images/arrowsShooter.png");
-window.addEventListener("DOMContentLoaded", () => {
-  phoneControls();
-});}
 
 // Start
 function draw() {
@@ -304,6 +301,10 @@ function touchStarted() {
     PacGun = false;
     resetLevel();
   }
+  window.addEventListener("DOMContentLoaded", () => {
+  phoneControls();
+});}
+
 }
 
 // Ghost movement
