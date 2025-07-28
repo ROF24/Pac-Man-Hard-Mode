@@ -24,10 +24,10 @@ let guns = [];
 let levelWin = 0;
 let ghostImages = [];
 let ghosts = [
-  { name: "Blinky", row: 1, col: 20, img: ghostImages[0], stunned: false, stunTimer: 0 },
-  { name: "Pinky", row: 1, col: 26, img: ghostImages[1], stunned: false, stunTimer: 0 },
-  { name: "Inky", row: 15, col: 5, img: ghostImages[2], stunned: false, stunTimer: 0 },
-  { name: "Clyde", row: 10, col: 20, img: ghostImages[3], stunned: false, stunTimer: 0 }
+  { row: 1, col: 20, img: null, stunned: false, stunTimer: 0 },
+  { row: 1, col: 26, img: null, stunned: false, stunTimer: 0 },
+  { row: 15, col: 5, img: null, stunned: false, stunTimer: 0 },
+  { row: 10, col: 20, img: null, stunned: false, stunTimer: 0 }
 ];
 let PacGun = false;
 const AudioofGun = new Audio("gun/gun.wav");
@@ -106,7 +106,7 @@ function setup() {
 function draw() {
   background(0);
   if (gameState === "start") return showStartScreen();
-  if (gameState === "level1won") return showlevel1Won();
+  if (gameState === "levelwon") return showlevelWon();
   if (gameState === "over") return showGameOver();
   drawMazeAndDots();
   AudioofMusic.play();
@@ -194,7 +194,7 @@ function drawMazeAndDots() {
   //Win Condition
   if (maze[pacRow][pacCol] === 2) maze[pacRow][pacCol] = 0;
   if (dotsLeft === 0) {
-    gameState = "level1won";
+    gameState = "levelwon";
     levelWin ++;
   }
 }
@@ -281,7 +281,7 @@ function keyPressed() {
 // Mouse uses
 function mousePressed() {
   if (gameState === "start") gameState = "playing"; 
-  if (gameState === "level1won" && levelWin === 1) {
+  if (gameState === "levelwon") {
     PacGun = false;
     gameState = "playing";
     resetLevel();
@@ -309,10 +309,6 @@ function touchStarted() {
 
 // Ghost movement
 function moveGhost(ghost) {
-  if (randomMovement) {
-  moveGhostRandomly(ghost);
-  return;
-  }
   if (ghost.stunned) {
     ghost.stunTimer--;
     if (ghost.stunTimer <= 0) {
@@ -321,37 +317,26 @@ function moveGhost(ghost) {
     return;
   }
 
-  let target = getTargetTile(ghost);
-  let bestDir = null;
-  let minDist = Infinity;
-
-  let dirs = [
-    { r: -1, c: 0, name: "UP" },
-    { r: 1, c: 0, name: "DOWN" },
-    { r: 0, c: -1, name: "LEFT" },
-    { r: 0, c: 1, name: "RIGHT" }
-  ];
-
-  for (let d of dirs) {
+  let dirs = [ { r: -1, c: 0 }, { r: 1, c: 0 }, { r: 0, c: -1 }, { r: 0, c: 1 } ];
+  for (let i = 0; i < 10; i++) {
+    let d = random(dirs);
     let newRow = ghost.row + d.r;
     let newCol = ghost.col + d.c;
-
     if (newCol < 0) newCol = maze[0].length - 1;
     if (newCol >= maze[0].length) newCol = 0;
-
-    if (maze[newRow][newCol] !== 1 && maze[newRow][newCol] !== 5) {
-      let dist = abs(newRow - target.row) + abs(newCol - target.col); // Manhattan distance
-      if (dist < minDist) {
-        minDist = dist;
-        bestDir = d;
-      }
+    if (maze[newRow][newCol] !== 1) {
+      ghost.row = newRow;
+      ghost.col = newCol;
+      break;
     }
   }
+}
 
-  if (bestDir) {
-    ghost.row += bestDir.r;
-    ghost.col += bestDir.c;
-  }
+function getRotationAngle(dir) {
+  if (dir === "UP") return -HALF_PI;
+  if (dir === "DOWN") return HALF_PI;
+  if (dir === "LEFT") return PI;
+  return 0;
 }
 
 // Rotation Angle
@@ -393,8 +378,8 @@ function showGameOver() {
   arrows = []; // Clear arrows
 }
 
-// Shows you won Level 1
-function showlevel1Won() {
+// Shows you won Level
+function showlevelWon() {
   background(0);
   fill(0, 255, 0);
   textAlign(CENTER, CENTER);
@@ -402,7 +387,7 @@ function showlevel1Won() {
   text("YOU WIN!", width / 2, height / 2 - 40);
   textSize(20);
   fill(255);
-  text("Click to Play Level 2", width / 2, height / 2  + 20);
+  text("Click to Play Level " + (levelWin + 1), width / 2, height / 2  + 20);
   AudioofMusic.pause();
   AudioofMusic.currentTime = 0;
   AudioofWin.play();
@@ -644,56 +629,6 @@ function moveAndDrawArrows() {
     if (arrowCol === pacCol && arrowRow === pacRow) {
       gameState = "over"; // If arrow hits Pacman, game over
     }
-  }
-}
-function getTargetTile(ghost) {
-  if (ghost.name === "Blinky") {
-    // Chase Pac-Man directly
-    return { row: pacRow, col: pacCol };
-  } else if (ghost.name === "Pinky") {
-    // 4 tiles ahead of Pac-Man
-    let offset = 4;
-    let targetRow = pacRow;
-    let targetCol = pacCol;
-    if (direction === "UP") targetRow -= offset;
-    else if (direction === "DOWN") targetRow += offset;
-    else if (direction === "LEFT") targetCol -= offset;
-    else if (direction === "RIGHT") targetCol += offset;
-
-    // Clamp to bounds
-    targetRow = constrain(targetRow, 0, maze.length - 1);
-    targetCol = constrain(targetCol, 0, maze[0].length - 1);
-    return { row: targetRow, col: targetCol };
-  }
-  // Default behavior
-  return { row: pacRow, col: pacCol };
-}
-function moveGhostRandomly(ghost) {
-  let dirs = [
-    { r: -1, c: 0 }, // UP
-    { r: 1, c: 0 },  // DOWN
-    { r: 0, c: -1 }, // LEFT
-    { r: 0, c: 1 }   // RIGHT
-  ];
-
-  let validMoves = [];
-
-  for (let d of dirs) {
-    let newRow = ghost.row + d.r;
-    let newCol = ghost.col + d.c;
-
-    if (newCol < 0) newCol = maze[0].length - 1;
-    if (newCol >= maze[0].length) newCol = 0;
-
-    if (maze[newRow][newCol] !== 1) {
-      validMoves.push(d);
-    }
-  }
-
-  if (validMoves.length > 0) {
-    let move = random(validMoves);
-    ghost.row += move.r;
-    ghost.col += move.c;
   }
 }
 function calculateTitleSize() {
