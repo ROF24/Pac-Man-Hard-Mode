@@ -35,8 +35,8 @@ canvas {
   }
   
   .phone-buttonA, .phone-buttonB, .phone-buttonC {
-    width: 50px;
-    height: 50px;
+    width: 55px;
+    height: 55px;
     font-size: 14px; /* Adjust size for smaller screens */
   }
 }
