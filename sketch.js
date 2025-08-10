@@ -182,7 +182,7 @@ function drawMazeAndDots() {
             );
             setTimeout(() => {
             maze[row][col] = 0;  
-          }, 3000);//delete the locks after 30 seconds
+          }, 30000);//delete the locks after 30 seconds
         
           } else if (maze[row][col] === 6) {
              image(arrowsShooterImage, x, y, titleSize, titleSize);
